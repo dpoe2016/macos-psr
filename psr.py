@@ -817,6 +817,8 @@ class AppDelegate(NSObject):
         kc = event.keyCode()
         flags = event.modifierFlags()
         ctrl = bool(flags & (1 << 18))  # NSEventModifierFlagControl
+        chars = event.charactersIgnoringModifiers() or ""
+        print(f"  [KEY] keyCode={kc} ctrl={ctrl} char='{chars}' drawMode={self.overlay.draw_mode}")
 
         # Ctrl+1..8 for tools, ESC/Enter without modifiers
         # Key codes: 1=18, 2=19, 3=20, 4=21, 5=23, 6=22, 7=26, 8=28
@@ -926,8 +928,8 @@ def main():
         help="Skip AI-generated step descriptions in PDF",
     )
     parser.add_argument(
-        "-w", "--window", action="store_true", default=False,
-        help="Capture only the active application window instead of the full screen",
+        "--fullscreen", action="store_true", default=False,
+        help="Capture the full screen instead of only the active window (default: active window)",
     )
     args = parser.parse_args()
 
@@ -937,7 +939,7 @@ def main():
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_dir = os.path.expanduser(f"~/Desktop/PSR_{ts}")
 
-    recorder = StepRecorder(output_dir, click_delay=args.delay, window_only=args.window)
+    recorder = StepRecorder(output_dir, click_delay=args.delay, window_only=not args.fullscreen)
     recorder.pdf_enabled = args.pdf
     recorder.ai_enabled = not args.no_ai
 
